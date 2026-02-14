@@ -43,6 +43,7 @@ const EmployeeLeadManagement = () => {
   const [pdfGenerated, setPdfGenerated] = useState(false);
   const [pdfUrl, setPdfUrl] = useState('');
   const [generatingPdf, setGeneratingPdf] = useState(false);
+  const [quotationExists, setQuotationExists] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -98,21 +99,102 @@ const EmployeeLeadManagement = () => {
     setShowDetailsModal(true);
   };
 
-  const handleGenerateQuotation = (lead) => {
+  const handleGenerateQuotation = async (lead) => {
     setSelectedLead(lead);
-    // Initialize products array with the lead's product
-    setProducts([{
-      id: Date.now(),
-      productName: lead.productName || '',
-      description: '',
-      quantity: lead.quantityRequested || 1,
-      price: '',
-      unit: 'Unit',
-      image: null,
-      selected: true
-    }]);
-    setCurrentStep(1);
-    setCurrency('₹');
+    
+    // Check if quotation already exists
+    if (lead.quotation && lead.quotation.products && lead.quotation.products.length > 0) {
+      // Quotation exists - load it and go directly to step 4
+      setQuotationExists(true);
+      
+      // Load quotation data
+      const quotation = lead.quotation;
+      setProducts(quotation.products.map((p, index) => ({
+        id: Date.now() + index,
+        productName: p.productName || '',
+        description: p.description || '',
+        quantity: p.quantity || 1,
+        price: p.price || '',
+        unit: p.unit || 'Unit',
+        image: null,
+        selected: p.selected !== false
+      })));
+      setTermsData({
+        discount: quotation.terms?.discount || '5',
+        applicableTaxes: quotation.terms?.applicableTaxes || '',
+        taxesIncluded: quotation.terms?.taxesIncluded || false,
+        shippingCharges: quotation.terms?.shippingCharges || '100',
+        shippingIncluded: quotation.terms?.shippingIncluded || false,
+        deliveryPeriod: quotation.terms?.deliveryPeriod || '1',
+        deliveryUnit: quotation.terms?.deliveryUnit || 'Days',
+        paymentTerms: quotation.terms?.paymentTerms || '',
+        additionalInformation: quotation.terms?.additionalInformation || '',
+        documents: []
+      });
+      setVerifyData({
+        primaryEmail: quotation.verify?.primaryEmail || employeeEmail,
+        alternateEmail: quotation.verify?.alternateEmail || '',
+        primaryPhone: quotation.verify?.primaryPhone || '',
+        alternatePhone: quotation.verify?.alternatePhone || '',
+        pnsPhone: quotation.verify?.pnsPhone || '',
+        primaryPhoneSelected: quotation.verify?.primaryPhoneSelected || false,
+        alternatePhoneSelected: quotation.verify?.alternatePhoneSelected || false,
+        pnsPhoneSelected: quotation.verify?.pnsPhoneSelected || false,
+        addressType: quotation.verify?.addressType || 'Primary',
+        addressLine1: quotation.verify?.addressLine1 || '',
+        addressLine2: quotation.verify?.addressLine2 || '',
+        addressPhone: quotation.verify?.addressPhone || ''
+      });
+      setCurrency(quotation.currency || '₹');
+      
+      // Go directly to step 4 and load PDF from MongoDB
+      setCurrentStep(4);
+      
+      // Load existing PDF from MongoDB
+      try {
+        const response = await axios.get(`http://localhost:5000/api/quotation/${lead._id}`, {
+          responseType: 'blob'
+        });
+        const blob = new Blob([response.data], { type: 'application/pdf' });
+        const url = window.URL.createObjectURL(blob);
+        setPdfUrl(url);
+        setPdfGenerated(true);
+      } catch (error) {
+        console.error('Error loading PDF from MongoDB:', error);
+        // If PDF not found (404), regenerate it
+        if (error.response?.status === 404) {
+          console.log('PDF not found in MongoDB, regenerating...');
+          setPdfGenerated(false);
+          setTimeout(() => {
+            handleGeneratePdf();
+          }, 500);
+        } else {
+          // Other errors - show error message
+          alert('Error loading PDF. Please try generating it again.');
+          setPdfGenerated(false);
+        }
+      }
+    } else {
+      // No quotation exists - start fresh
+      setQuotationExists(false);
+      
+      // Initialize products array with the lead's product
+      setProducts([{
+        id: Date.now(),
+        productName: lead.productName || '',
+        description: '',
+        quantity: lead.quantityRequested || 1,
+        price: '',
+        unit: 'Unit',
+        image: null,
+        selected: true
+      }]);
+      setCurrentStep(1);
+      setCurrency('₹');
+      setPdfGenerated(false);
+      setPdfUrl('');
+    }
+    
     setShowQuotationModal(true);
   };
 
@@ -126,6 +208,7 @@ const EmployeeLeadManagement = () => {
     setSelectedLead(null);
     setProducts([]);
     setCurrentStep(1);
+    setQuotationExists(false);
     setTermsData({
       discount: '5',
       applicableTaxes: '',
@@ -152,6 +235,9 @@ const EmployeeLeadManagement = () => {
       addressLine2: '',
       addressPhone: ''
     });
+    setPdfGenerated(false);
+    setPdfUrl('');
+    setGeneratingPdf(false);
   };
 
   const handleAddProduct = () => {
@@ -200,6 +286,11 @@ const EmployeeLeadManagement = () => {
   };
 
   const handleStepClick = (step) => {
+    // If quotation exists, only allow step 4, prevent clicking steps 1-3
+    if (quotationExists && step < 4) {
+      return; // Don't allow navigation to steps 1-3 if quotation exists
+    }
+    
     setCurrentStep(step);
     // Auto-generate PDF when clicking on step 4
     if (step === 4 && !pdfGenerated) {
@@ -302,9 +393,53 @@ const EmployeeLeadManagement = () => {
   };
 
   const handleModify = () => {
+    // Reset to allow full cycle - clear quotation exists flag
+    setQuotationExists(false);
     setCurrentStep(1);
     setPdfGenerated(false);
     setPdfUrl('');
+    
+    // Reset to initial product state
+    if (selectedLead) {
+      setProducts([{
+        id: Date.now(),
+        productName: selectedLead.productName || '',
+        description: '',
+        quantity: selectedLead.quantityRequested || 1,
+        price: '',
+        unit: 'Unit',
+        image: null,
+        selected: true
+      }]);
+    }
+    
+    // Reset terms and verify data
+    setTermsData({
+      discount: '5',
+      applicableTaxes: '',
+      taxesIncluded: false,
+      shippingCharges: '100',
+      shippingIncluded: false,
+      deliveryPeriod: '1',
+      deliveryUnit: 'Days',
+      paymentTerms: '',
+      additionalInformation: '',
+      documents: []
+    });
+    setVerifyData({
+      primaryEmail: employeeEmail,
+      alternateEmail: '',
+      primaryPhone: '',
+      alternatePhone: '',
+      pnsPhone: '',
+      primaryPhoneSelected: false,
+      alternatePhoneSelected: false,
+      pnsPhoneSelected: false,
+      addressType: 'Primary',
+      addressLine1: '',
+      addressLine2: '',
+      addressPhone: ''
+    });
   };
 
   const handleSendQuotation = async () => {
@@ -500,20 +635,32 @@ const EmployeeLeadManagement = () => {
               <div className="quotation-steps-panel">
                 <div className="quotation-steps">
                   <div 
-                    className={`quotation-step ${currentStep === 1 ? 'active' : ''}`}
-                    onClick={() => handleStepClick(1)}
+                    className={`quotation-step ${currentStep === 1 ? 'active' : ''} ${quotationExists ? 'disabled' : ''}`}
+                    onClick={() => !quotationExists && handleStepClick(1)}
+                    style={{ 
+                      cursor: quotationExists ? 'not-allowed' : 'pointer',
+                      opacity: quotationExists ? 0.5 : 1
+                    }}
                   >
                     1. Select Product
                   </div>
                   <div 
-                    className={`quotation-step ${currentStep === 2 ? 'active' : ''}`}
-                    onClick={() => handleStepClick(2)}
+                    className={`quotation-step ${currentStep === 2 ? 'active' : ''} ${quotationExists ? 'disabled' : ''}`}
+                    onClick={() => !quotationExists && handleStepClick(2)}
+                    style={{ 
+                      cursor: quotationExists ? 'not-allowed' : 'pointer',
+                      opacity: quotationExists ? 0.5 : 1
+                    }}
                   >
                     2. Terms & Conditions
                   </div>
                   <div 
-                    className={`quotation-step ${currentStep === 3 ? 'active' : ''}`}
-                    onClick={() => handleStepClick(3)}
+                    className={`quotation-step ${currentStep === 3 ? 'active' : ''} ${quotationExists ? 'disabled' : ''}`}
+                    onClick={() => !quotationExists && handleStepClick(3)}
+                    style={{ 
+                      cursor: quotationExists ? 'not-allowed' : 'pointer',
+                      opacity: quotationExists ? 0.5 : 1
+                    }}
                   >
                     3. Verify Details
                   </div>
