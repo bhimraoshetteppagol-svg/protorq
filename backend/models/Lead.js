@@ -33,6 +33,11 @@ const leadSchema = new mongoose.Schema({
     type: String,
     enum: ['pending', 'assigned', 'in-progress', 'completed', 'cancelled'],
     default: 'pending'
+  },
+  quotation: {
+    type: mongoose.Schema.Types.Mixed,
+    required: false,
+    default: null
   }
 }, {
   timestamps: true
