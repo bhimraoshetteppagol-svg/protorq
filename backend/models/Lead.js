@@ -38,6 +38,25 @@ const leadSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.Mixed,
     required: false,
     default: null
+  },
+  comments: {
+    type: [{
+      comment: {
+        type: String,
+        required: true,
+        trim: true
+      },
+      authorType: {
+        type: String,
+        enum: ['admin', 'employee'],
+        required: true
+      },
+      createdAt: {
+        type: Date,
+        default: Date.now
+      }
+    }],
+    default: []
   }
 }, {
   timestamps: true

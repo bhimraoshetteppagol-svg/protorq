@@ -8,7 +8,6 @@ import Employee from './pages/Employee';
 import User from './pages/User';
 import UserManagement from './pages/UserManagement';
 import EmployeeManagement from './pages/EmployeeManagement';
-import EmployeeUserManagement from './pages/EmployeeUserManagement';
 import ProductManagement from './pages/ProductManagement';
 import LeadManagement from './pages/LeadManagement';
 import EmployeeLeadManagement from './pages/EmployeeLeadManagement';
@@ -28,7 +27,6 @@ function App() {
           <Route path="/admin/products" element={<ProductManagement />} />
           <Route path="/admin/leads" element={<LeadManagement />} />
           <Route path="/employee" element={<Employee />} />
-          <Route path="/employee/users" element={<EmployeeUserManagement />} />
           <Route path="/employee/leads" element={<EmployeeLeadManagement />} />
           <Route path="/user" element={<User />} />
           <Route path="/" element={<Navigate to="/home" replace />} />

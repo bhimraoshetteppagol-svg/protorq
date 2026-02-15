@@ -64,6 +64,50 @@ router.post('/leads', async (req, res) => {
   }
 });
 
+// Assign lead to employee (must be before generic update route)
+router.put('/leads/:id/assign', async (req, res) => {
+  try {
+    const { assignedEmployee, comment } = req.body;
+    const leadId = req.params.id;
+
+    if (!assignedEmployee) {
+      return res.status(400).json({ message: 'Employee email is required' });
+    }
+
+    // Find lead
+    const lead = await Lead.findById(leadId);
+    if (!lead) {
+      return res.status(404).json({ message: 'Lead not found' });
+    }
+
+    // Update assignment
+    lead.assignedEmployee = assignedEmployee.trim();
+    lead.status = 'assigned';
+
+    // Add comment if provided
+    if (comment && comment.trim()) {
+      if (!lead.comments) {
+        lead.comments = [];
+      }
+      lead.comments.push({
+        comment: comment.trim(),
+        authorType: 'admin',
+        createdAt: new Date()
+      });
+    }
+
+    await lead.save();
+
+    res.json({
+      message: 'Lead assigned successfully',
+      lead: lead
+    });
+  } catch (error) {
+    console.error('Assign lead error:', error);
+    res.status(500).json({ message: error.message || 'Internal server error' });
+  }
+});
+
 // Update lead
 router.put('/leads/:id', async (req, res) => {
   try {
