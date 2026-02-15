@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import API_URL from '../config/api';
 import './LeadManagement.css';
 
 const EmployeeLeadManagement = () => {
@@ -80,7 +81,7 @@ const EmployeeLeadManagement = () => {
 
   const fetchLeads = async (email) => {
     try {
-      const response = await axios.get('http://localhost:5000/api/leads');
+      const response = await axios.get(`${API_URL}/api/leads`);
       // Filter leads assigned to this employee
       const assignedLeads = response.data.filter(
         lead => lead.assignedEmployee && lead.assignedEmployee.toLowerCase() === email.toLowerCase()
@@ -152,7 +153,7 @@ const EmployeeLeadManagement = () => {
       
       // Load existing PDF from MongoDB
       try {
-        const response = await axios.get(`http://localhost:5000/api/quotation/${lead._id}`, {
+        const response = await axios.get(`${API_URL}/api/quotation/${lead._id}`, {
           responseType: 'blob'
         });
         const blob = new Blob([response.data], { type: 'application/pdf' });
@@ -344,7 +345,7 @@ const EmployeeLeadManagement = () => {
         requesterNumber: selectedLead.requesterNumber
       };
 
-      const response = await axios.post('http://localhost:5000/api/quotation/generate', quotationData, {
+      const response = await axios.post(`${API_URL}/api/quotation/generate`, quotationData, {
         responseType: 'blob'
       });
 
@@ -446,7 +447,7 @@ const EmployeeLeadManagement = () => {
     if (!selectedLead || !pdfGenerated) return;
     
     try {
-      await axios.post('http://localhost:5000/api/quotation/send', {
+      await axios.post(`${API_URL}/api/quotation/send`, {
         leadId: selectedLead._id,
         requesterEmail: selectedLead.requesterEmail
       });

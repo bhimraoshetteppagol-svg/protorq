@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import API_URL from '../config/api';
 import './Page.css';
 import './LeadManagement.css';
 
@@ -89,7 +90,7 @@ const Employee = () => {
 
   const fetchLeads = async (email) => {
     try {
-      const response = await axios.get('http://localhost:5000/api/leads');
+      const response = await axios.get(`${API_URL}/api/leads`);
       // Filter leads assigned to this employee
       const assignedLeads = response.data.filter(
         lead => lead.assignedEmployee && lead.assignedEmployee.toLowerCase() === email.toLowerCase()
@@ -122,7 +123,7 @@ const Employee = () => {
   };
 
   const handleViewQuotation = (leadId) => {
-    const quotationUrl = `http://localhost:5000/api/quotation/${leadId}`;
+    const quotationUrl = `${API_URL}/api/quotation/${leadId}`;
     window.open(quotationUrl, '_blank');
   };
 
@@ -214,7 +215,7 @@ const Employee = () => {
       
       // Load existing PDF from MongoDB
       try {
-        const response = await axios.get(`http://localhost:5000/api/quotation/${lead._id}`, {
+        const response = await axios.get(`${API_URL}/api/quotation/${lead._id}`, {
           responseType: 'blob'
         });
         const blob = new Blob([response.data], { type: 'application/pdf' });
@@ -401,7 +402,7 @@ const Employee = () => {
         requesterNumber: selectedLead.requesterNumber
       };
 
-      const response = await axios.post('http://localhost:5000/api/quotation/generate', quotationData, {
+      const response = await axios.post(`${API_URL}/api/quotation/generate`, quotationData, {
         responseType: 'blob'
       });
 
@@ -500,7 +501,7 @@ const Employee = () => {
     if (!selectedLead || !pdfGenerated) return;
     
     try {
-      await axios.post('http://localhost:5000/api/quotation/send', {
+      await axios.post(`${API_URL}/api/quotation/send`, {
         leadId: selectedLead._id,
         requesterEmail: selectedLead.requesterEmail
       });

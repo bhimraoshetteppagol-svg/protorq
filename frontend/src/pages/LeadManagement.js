@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import API_URL from '../config/api';
 import './LeadManagement.css';
 
 const LeadManagement = () => {
@@ -39,7 +40,7 @@ const LeadManagement = () => {
 
   const fetchLeads = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/leads');
+      const response = await axios.get(`${API_URL}/api/leads`);
       setLeads(response.data);
     } catch (error) {
       console.error('Error fetching leads:', error);
@@ -51,7 +52,7 @@ const LeadManagement = () => {
 
   const fetchEmployees = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/employees');
+      const response = await axios.get(`${API_URL}/api/employees`);
       console.log('Employees fetched:', response.data);
       setEmployees(response.data);
     } catch (error) {
@@ -96,7 +97,7 @@ const LeadManagement = () => {
       console.log('RequesterNumber value:', updateData.requesterNumber);
       console.log('RequesterNumber type:', typeof updateData.requesterNumber);
       
-      const response = await axios.put(`http://localhost:5000/api/leads/${selectedLead._id}`, updateData);
+      const response = await axios.put(`${API_URL}/api/leads/${selectedLead._id}`, updateData);
       console.log('Assignment successful:', response.data);
       setShowAssignModal(false);
       setSelectedLead(null);

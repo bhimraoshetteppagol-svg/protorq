@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import API_URL from '../config/api';
 import './Page.css';
 
 const Admin = () => {
@@ -63,7 +64,7 @@ const Admin = () => {
 
   const fetchLeads = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/leads');
+      const response = await axios.get(`${API_URL}/api/leads`);
       const leadsData = response.data;
       const sortedLeads = leadsData.sort((a, b) => {
         return new Date(b.createdAt) - new Date(a.createdAt);
@@ -78,7 +79,7 @@ const Admin = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/users');
+      const response = await axios.get(`${API_URL}/api/users`);
       setUsers(response.data);
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -88,7 +89,7 @@ const Admin = () => {
 
   const fetchEmployees = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/employees');
+      const response = await axios.get(`${API_URL}/api/employees`);
       console.log('Employees fetched:', response.data);
       setEmployees(response.data);
     } catch (error) {
@@ -101,7 +102,7 @@ const Admin = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/products');
+      const response = await axios.get(`${API_URL}/api/products`);
       setProducts(response.data);
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -150,7 +151,7 @@ const Admin = () => {
     }
 
     try {
-      await axios.put(`http://localhost:5000/api/leads/${selectedLead._id}/assign`, {
+      await axios.put(`${API_URL}/api/leads/${selectedLead._id}/assign`, {
         assignedEmployee: assignFormData.employeeEmail,
         comment: assignFormData.comment || ''
       });
@@ -169,7 +170,7 @@ const Admin = () => {
     }
 
     try {
-      await axios.delete(`http://localhost:5000/api/leads/${leadId}`);
+      await axios.delete(`${API_URL}/api/leads/${leadId}`);
       fetchLeads(); // Refresh leads list
     } catch (error) {
       console.error('Error deleting lead:', error);
@@ -179,7 +180,7 @@ const Admin = () => {
 
   const handleViewQuotation = (leadId) => {
     // Open quotation PDF in a new tab
-    const quotationUrl = `http://localhost:5000/api/quotation/${leadId}`;
+    const quotationUrl = `${API_URL}/api/quotation/${leadId}`;
     window.open(quotationUrl, '_blank');
   };
 
@@ -219,13 +220,13 @@ const Admin = () => {
 
     try {
       if (activeSection === 'users') {
-        await axios.delete(`http://localhost:5000/api/users/${itemId}`);
+        await axios.delete(`${API_URL}/api/users/${itemId}`);
         fetchUsers();
       } else if (activeSection === 'employees') {
-        await axios.delete(`http://localhost:5000/api/employees/${itemId}`);
+        await axios.delete(`${API_URL}/api/employees/${itemId}`);
         fetchEmployees();
       } else if (activeSection === 'products') {
-        await axios.delete(`http://localhost:5000/api/products/${itemId}`);
+        await axios.delete(`${API_URL}/api/products/${itemId}`);
         fetchProducts();
       }
     } catch (error) {
@@ -245,9 +246,9 @@ const Admin = () => {
           if (formData.password) {
             updateData.password = formData.password;
           }
-          await axios.put(`http://localhost:5000/api/users/${editingItem._id}`, updateData);
+          await axios.put(`${API_URL}/api/users/${editingItem._id}`, updateData);
         } else {
-          await axios.post('http://localhost:5000/api/users', formData);
+          await axios.post(`${API_URL}/api/users`, formData);
         }
         fetchUsers();
       } else if (activeSection === 'employees') {
@@ -256,16 +257,16 @@ const Admin = () => {
           if (formData.password) {
             updateData.password = formData.password;
           }
-          await axios.put(`http://localhost:5000/api/employees/${editingItem._id}`, updateData);
+          await axios.put(`${API_URL}/api/employees/${editingItem._id}`, updateData);
         } else {
-          await axios.post('http://localhost:5000/api/employees', formData);
+          await axios.post(`${API_URL}/api/employees`, formData);
         }
         fetchEmployees();
       } else if (activeSection === 'products') {
         if (editingItem) {
-          await axios.put(`http://localhost:5000/api/products/${editingItem._id}`, formData);
+          await axios.put(`${API_URL}/api/products/${editingItem._id}`, formData);
         } else {
-          await axios.post('http://localhost:5000/api/products', formData);
+          await axios.post(`${API_URL}/api/products`, formData);
         }
         fetchProducts();
       }

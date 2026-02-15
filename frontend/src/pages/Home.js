@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import API_URL from '../config/api';
 import './Home.css';
 
 const Home = () => {
@@ -15,7 +16,7 @@ const Home = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/products');
+      const response = await axios.get(`${API_URL}/api/products`);
       setProducts(response.data);
       
       // Get unique categories

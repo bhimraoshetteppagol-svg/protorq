@@ -1,0 +1,11 @@
+version: "2"
+# Replace YOUR_AUTH_TOKEN_HERE with your actual ngrok authtoken
+# Get it from: https://dashboard.ngrok.com/get-started/your-authtoken
+authtoken: YOUR_AUTH_TOKEN_HERE
+tunnels:
+  backend:
+    addr: 5000
+    proto: http
+  frontend:
+    addr: 7000
+    proto: http

@@ -420,7 +420,7 @@
   border-radius: 9999px;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   padding: 12px 16px;
-  max-width: fit-content;
+  width: 400px;
   margin: 0 auto;
   transition: all 0.3s ease;
 }
@@ -435,6 +435,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
+  position: relative;
 }
 
 .bottom-nav-icon {
@@ -444,13 +445,16 @@
   padding: 8px 12px;
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   gap: 8px;
   color: #7A7A7A;
   transition: all 0.3s ease;
   border-radius: 9999px;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
+  min-width: 44px;
+  width: 44px;
+  z-index: 2;
 }
 
 .bottom-nav-icon:hover {
@@ -472,6 +476,9 @@
   background: #EEF0F5;
   border: 1px solid #4076EF;
   border-radius: 9999px;
+  width: auto;
+  min-width: 80px;
+  padding-right: 16px;
 }
 
 .admin-dashboard-container.dark-theme .bottom-nav-icon.active {
@@ -495,13 +502,15 @@
   opacity: 0;
   max-width: 0;
   overflow: hidden;
-  transition: opacity 0.3s ease-out, max-width 0.3s ease-out;
+  transition: opacity 0.3s ease-out, max-width 0.3s ease-out, margin-left 0.3s ease-out;
   display: inline-block;
+  margin-left: 0;
 }
 
 .bottom-nav-icon.active .bottom-nav-label {
   opacity: 1;
   max-width: 200px;
+  margin-left: 4px;
 }
 
 /* Bottom Navigation Status Text */

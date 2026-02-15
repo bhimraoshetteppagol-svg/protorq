@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import API_URL from '../config/api';
 import './EmployeeManagement.css';
 
 const EmployeeManagement = () => {
@@ -37,7 +38,7 @@ const EmployeeManagement = () => {
 
   const fetchEmployees = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/employees');
+      const response = await axios.get(`${API_URL}/api/employees`);
       setEmployees(response.data);
     } catch (error) {
       console.error('Error fetching employees:', error);
@@ -75,7 +76,7 @@ const EmployeeManagement = () => {
     }
 
     try {
-      await axios.delete(`http://localhost:5000/api/employees/${employeeId}`);
+      await axios.delete(`${API_URL}/api/employees/${employeeId}`);
       fetchEmployees(); // Refresh the list
     } catch (error) {
       console.error('Error deleting employee:', error);
@@ -95,14 +96,14 @@ const EmployeeManagement = () => {
           updateData.password = formData.password;
         }
         
-        await axios.put(`http://localhost:5000/api/employees/${editingEmployee._id}`, updateData);
+        await axios.put(`${API_URL}/api/employees/${editingEmployee._id}`, updateData);
       } else {
         // Create new employee
         if (!formData.password) {
           setError('Password is required for new employees');
           return;
         }
-        await axios.post('http://localhost:5000/api/employees', formData);
+        await axios.post(`${API_URL}/api/employees`, formData);
       }
 
       setShowModal(false);

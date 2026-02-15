@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
+import API_URL from '../config/api';
+import { setQuotationFormData, getQuotationFormData } from '../utils/cookies';
 import './CategoryProducts.css';
 
 const CategoryProducts = () => {
@@ -24,7 +26,7 @@ const CategoryProducts = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/products');
+      const response = await axios.get(`${API_URL}/api/products`);
       // Filter products by category
       const categoryProducts = response.data.filter(
         product => product.category === decodeURIComponent(category)
@@ -49,9 +51,11 @@ const CategoryProducts = () => {
 
   const handleGetQuotation = (product) => {
     setSelectedProduct(product);
+    // Load saved form data from cookies
+    const savedData = getQuotationFormData();
     setFormData({
-      email: '',
-      phoneNumber: ''
+      email: savedData.email || '',
+      phoneNumber: savedData.phoneNumber || ''
     });
     setError('');
     setShowQuotationModal(true);
@@ -98,7 +102,10 @@ const CategoryProducts = () => {
         assignedEmployee: ''
       };
 
-      await axios.post('http://localhost:5000/api/leads', leadData);
+      await axios.post(`${API_URL}/api/leads`, leadData);
+      
+      // Save form data to cookies for future use
+      setQuotationFormData(formData.email.trim().toLowerCase(), formData.phoneNumber.trim());
       
       // Success - close modal and show success message
       handleCloseModal();

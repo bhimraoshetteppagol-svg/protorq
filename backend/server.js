@@ -5,8 +5,38 @@ require('dotenv').config();
 
 const app = express();
 
-// Middleware
-app.use(cors());
+// Middleware - CORS configured for localhost, network IP, and ngrok
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow requests with no origin (mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+    
+    // Allow localhost, IP addresses, and ngrok domains
+    const allowedOrigins = [
+      'http://localhost:7000',
+      /^http:\/\/\d+\.\d+\.\d+\.\d+:7000$/,  // Any IP:7000
+      /^http:\/\/localhost:7000$/,
+      /^http:\/\/127\.0\.0\.1:7000$/,
+      /^https?:\/\/.*\.ngrok\.io$/,  // ngrok.io domains
+      /^https?:\/\/.*\.ngrok-free\.app$/,  // ngrok-free.app domains
+      /^https?:\/\/.*\.ngrok\.app$/  // ngrok.app domains
+    ];
+    
+    const isAllowed = allowedOrigins.some(pattern => {
+      if (typeof pattern === 'string') {
+        return origin === pattern;
+      } else {
+        return pattern.test(origin);
+      }
+    });
+    
+    // Allow all origins for maximum compatibility (including ngrok)
+    callback(null, true);
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -74,7 +104,11 @@ app.get('/api', (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+const HOST = process.env.HOST || '0.0.0.0';
+
+app.listen(PORT, HOST, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Network access available on all interfaces (0.0.0.0:${PORT})`);
+  console.log(`Access from network: http://YOUR_IP:${PORT}`);
 });
 

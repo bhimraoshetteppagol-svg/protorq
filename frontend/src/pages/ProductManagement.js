@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import API_URL from '../config/api';
 import './ProductManagement.css';
 
 const ProductManagement = () => {
@@ -38,7 +39,7 @@ const ProductManagement = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/products');
+      const response = await axios.get(`${API_URL}/api/products`);
       setProducts(response.data);
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -78,7 +79,7 @@ const ProductManagement = () => {
     }
 
     try {
-      await axios.delete(`http://localhost:5000/api/products/${productId}`);
+      await axios.delete(`${API_URL}/api/products/${productId}`);
       fetchProducts(); // Refresh the list
     } catch (error) {
       console.error('Error deleting product:', error);
@@ -107,10 +108,10 @@ const ProductManagement = () => {
 
       if (editingProduct) {
         // Update existing product
-        await axios.put(`http://localhost:5000/api/products/${editingProduct._id}`, productData);
+        await axios.put(`${API_URL}/api/products/${editingProduct._id}`, productData);
       } else {
         // Create new product
-        await axios.post('http://localhost:5000/api/products', productData);
+        await axios.post(`${API_URL}/api/products`, productData);
       }
 
       setShowModal(false);

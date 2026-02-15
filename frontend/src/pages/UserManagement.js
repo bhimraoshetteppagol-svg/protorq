@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import API_URL from '../config/api';
 import './UserManagement.css';
 
 const UserManagement = () => {
@@ -37,7 +38,7 @@ const UserManagement = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/users');
+      const response = await axios.get(`${API_URL}/api/users`);
       setUsers(response.data);
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -75,7 +76,7 @@ const UserManagement = () => {
     }
 
     try {
-      await axios.delete(`http://localhost:5000/api/users/${userId}`);
+      await axios.delete(`${API_URL}/api/users/${userId}`);
       fetchUsers(); // Refresh the list
     } catch (error) {
       console.error('Error deleting user:', error);
@@ -95,14 +96,14 @@ const UserManagement = () => {
           updateData.password = formData.password;
         }
         
-        await axios.put(`http://localhost:5000/api/users/${editingUser._id}`, updateData);
+        await axios.put(`${API_URL}/api/users/${editingUser._id}`, updateData);
       } else {
         // Create new user
         if (!formData.password) {
           setError('Password is required for new users');
           return;
         }
-        await axios.post('http://localhost:5000/api/users', formData);
+        await axios.post(`${API_URL}/api/users`, formData);
       }
 
       setShowModal(false);
